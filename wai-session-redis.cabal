@@ -1,0 +1,64 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: f33a053e3437eaf90fbc2558385a11a7174e31a08adfff60e5d7758a80d739aa
+
+name:           wai-session-redis
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/t4ccer/wai-session-redis#readme>
+homepage:       https://github.com/t4ccer/wai-session-redis#readme
+bug-reports:    https://github.com/t4ccer/wai-session-redis/issues
+author:         t4ccer
+maintainer:     t4ccre@gmail.com
+copyright:      t4ccer
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/t4ccer/wai-session-redis
+
+library
+  exposed-modules:
+      Network.Wai.Session.Redis
+      Network.Wai.Session.Redis.Internal
+      Network.Wai.Session.Redis.SessionSettings
+  other-modules:
+      Paths_wai_session_redis
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.10.0 && <5
+    , bytestring
+    , cookie
+    , hedis
+    , http-types
+    , uuid
+    , wai
+    , warp
+  default-language: Haskell2010
+
+executable wai-redis-session-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_wai_session_redis
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wall -Wno-unused-do-bind -Wpartial-fields -Wincomplete-uni-patterns
+  build-depends:
+      base >=4.10.0 && <5
+    , bytestring
+    , cookie
+    , hedis
+    , http-types
+    , uuid
+    , wai
+    , wai-session-redis
+    , warp
+  default-language: Haskell2010
