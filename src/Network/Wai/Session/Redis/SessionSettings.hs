@@ -4,6 +4,7 @@
 module Network.Wai.Session.Redis.SessionSettings where
 
 import           Data.ByteString (ByteString)
+import           Data.Default
 import           Database.Redis  (ConnectInfo, defaultConnectInfo)
 
 data SessionSettings = SessionSettings
@@ -12,6 +13,9 @@ data SessionSettings = SessionSettings
   -- ^ Session expiration time in seconds
   , sessionCookieName   :: ByteString
   }
+
+instance Default SessionSettings where
+  def = defaultSessionSettings
 
 defaultSessionSettings :: SessionSettings
 defaultSessionSettings  = SessionSettings

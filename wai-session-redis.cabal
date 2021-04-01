@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f33a053e3437eaf90fbc2558385a11a7174e31a08adfff60e5d7758a80d739aa
+-- hash: 8402a4bf85ed058279335fce36b00897c43951ab5d33d555705a7d80b8a8ad1e
 
 name:           wai-session-redis
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
       base >=4.10.0 && <5
     , bytestring
     , cookie
+    , data-default
     , hedis
     , http-types
     , uuid
@@ -55,6 +56,7 @@ executable wai-redis-session-exe
       base >=4.10.0 && <5
     , bytestring
     , cookie
+    , data-default
     , hedis
     , http-types
     , uuid
