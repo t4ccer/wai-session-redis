@@ -1,3 +1,4 @@
+{-# LANGUAGE BlockArguments    #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
@@ -42,42 +43,42 @@ eitherToMaybe :: Either a b -> Maybe b
 eitherToMaybe (Left _)  = Nothing
 eitherToMaybe (Right a) = Just a
 
-connectAndRunRedis :: ConnectInfo -> Redis b -> IO b
-connectAndRunRedis ci cmd = do
+connectAndRunRedis :: MonadIO m => ConnectInfo -> Redis b -> m b
+connectAndRunRedis ci cmd = liftIO do
   conn <- connect ci
   res  <- runRedis conn cmd
   disconnect conn
   return res
 
-createSession :: SessionSettings -> IO ByteString
-createSession SessionSettings{..} = do
+createSession :: MonadIO m => SessionSettings -> m ByteString
+createSession SessionSettings{..} = liftIO do
   sesId <- genSessionId
   connectAndRunRedis redisConnectionInfo $ do
     hset sesId "" ""
     expire sesId expiratinTime
   return sesId
 
-isSesIdValid :: SessionSettings -> ByteString -> IO Bool
-isSesIdValid SessionSettings{..} sesId = do
+isSesIdValid :: MonadIO m => SessionSettings -> ByteString -> m Bool
+isSesIdValid SessionSettings{..} sesId = liftIO do
   res <- connectAndRunRedis redisConnectionInfo $ do
     exists sesId
   return $ fromRight False res
 
-insertIntoSession :: SessionSettings
+insertIntoSession :: MonadIO m => SessionSettings
   -> ByteString -- ^ Sessionn id
   -> ByteString -- ^ Key
   -> ByteString -- ^ Value
-  -> IO ()
+  -> m ()
 insertIntoSession SessionSettings{..} sesId key value = do
   connectAndRunRedis redisConnectionInfo $ do
     hset sesId key value
     expire sesId expiratinTime
   return ()
 
-lookupFromSession :: SessionSettings
+lookupFromSession :: MonadIO m => SessionSettings
   -> ByteString -- ^ Session id
   -> ByteString -- ^ Key
-  -> IO (Maybe ByteString)
+  -> m (Maybe ByteString)
 lookupFromSession SessionSettings{..} sesId key = do
   v <- connectAndRunRedis redisConnectionInfo $ do
     v <- hget sesId key
@@ -86,20 +87,20 @@ lookupFromSession SessionSettings{..} sesId key = do
   return $ join $ eitherToMaybe v
 
 -- | Invalidate session id
-clearSession :: SessionSettings -- ^
+clearSession :: MonadIO m => SessionSettings
   -> ByteString -- ^ Session id
-  -> IO ()
+  -> m ()
 clearSession SessionSettings{..} sessionId = do
   connectAndRunRedis redisConnectionInfo $ do
     del [sessionId]
   return ()
 
 -- | Create new redis backend wai session store
-dbStore :: (MonadIO m, Eq k, Serialize k, Serialize v) => SessionSettings -> IO (SessionStore m k v)
+dbStore :: (MonadIO m1, MonadIO m2, Eq k, Serialize k, Serialize v) => SessionSettings -> m2 (SessionStore m1 k v)
 dbStore s = do
   return $ redisStore' s
 
-dbStore' :: (MonadIO m1, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> IO (Session m1 k v, m2 ByteString)
+dbStore' :: (MonadIO m1, MonadIO m2, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> m2 (Session m1 k v, m2 ByteString)
 dbStore' s (Just sesId) = do
   isValid <- isSesIdValid s sesId
   if isValid
@@ -109,7 +110,7 @@ redisStore' s Nothing = do
   sesId <- createSession s
   return (mkSessionFromSesId s sesId, return sesId)
 
-mkSessionFromSesId :: (MonadIO m, Eq k, Serialize k, Serialize v) => SessionSettings -> ByteString -> Session m k v
+mkSessionFromSesId :: (MonadIO m1, Eq k, Serialize k, Serialize v) => SessionSettings -> ByteString -> Session m1 k v
 mkSessionFromSesId s sesId = (mkLookup, mkInsert)
   where
     mkLookup k = liftIO $ fmap (join . fmap (eitherToMaybe . decode)) $ lookupFromSession s sesId (encode k)
