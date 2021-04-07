@@ -26,6 +26,6 @@ main :: IO ()
 main = do
   let s = def
   session <- Vault.newKey
-  store <- redisStore s
+  store <- dbStore s
   run 1337 $ withSession store (fromString "SESSION") def session $ app session
 

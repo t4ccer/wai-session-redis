@@ -1,8 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
+-- |
+-- Module: Network.Wai.Session.Redis
+-- Copyright: (c) 2021, t4ccer
+-- License: BSD3
+-- Stability: experimental
+-- Portability: portable
+--
+-- Simple Redis backed wai-session backend. This module allows you to store
+-- session data of wai-sessions in a Redis database.
 module Network.Wai.Session.Redis
-  ( redisStore
+  ( dbStore
   , clearSession
   , SessionSettings(..)
   ) where
@@ -16,6 +25,7 @@ import           Data.Serialize         (Serialize, decode, encode)
 import           Database.Redis         hiding (decode)
 import           Network.Wai.Session
 
+-- | Settings to control session store
 data SessionSettings = SessionSettings
   { redisConnectionInfo :: ConnectInfo
   , expiratinTime       :: Integer
@@ -84,12 +94,13 @@ clearSession SessionSettings{..} sessionId = do
     del [sessionId]
   return ()
 
-redisStore :: (MonadIO m, Eq k, Serialize k, Serialize v) => SessionSettings -> IO (SessionStore m k v)
-redisStore s = do
+-- | Create new redis backend wai session store
+dbStore :: (MonadIO m, Eq k, Serialize k, Serialize v) => SessionSettings -> IO (SessionStore m k v)
+dbStore s = do
   return $ redisStore' s
 
-redisStore' :: (MonadIO m1, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> IO (Session m1 k v, m2 ByteString)
-redisStore' s (Just sesId) = do
+dbStore' :: (MonadIO m1, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> IO (Session m1 k v, m2 ByteString)
+dbStore' s (Just sesId) = do
   isValid <- isSesIdValid s sesId
   if isValid
     then return (mkSessionFromSesId s sesId, return sesId)

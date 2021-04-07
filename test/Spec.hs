@@ -15,7 +15,7 @@ main = hspec spec
 
 spec :: Spec
 spec = describe "Network.Wai.Session.Redis" $ it "handles sessions" $ do
-    store <- redisStore testSettings
+    store <- dbStore testSettings
 
     -- new session
     ((lookupSess1, insertSess1), mknewsessid) <- store Nothing
