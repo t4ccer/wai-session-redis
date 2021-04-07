@@ -1,27 +1,74 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Network.Wai.Session.Redis where
+module Network.Wai.Session.Redis
+  ( redisStore
+  , clearSession
+  , SessionSettings(..)
+  ) where
 
 import           Control.Monad
-import           Data.ByteString                           (ByteString)
-import           Database.Redis
-import           Network.HTTP.Types
-import           Network.Wai
+import           Control.Monad.IO.Class
+import           Data.ByteString        (ByteString)
+import           Data.Default
+import           Data.Serialize         (Serialize, decode, encode)
+import           Database.Redis         hiding (decode)
+import           Network.Wai.Session
 
-import           Network.Wai.Session.Redis.Internal
-import           Network.Wai.Session.Redis.SessionSettings
+data SessionSettings = SessionSettings
+  { redisConnectionInfo :: ConnectInfo
+  , expiratinTime       :: Integer
+  -- ^ Session expiration time in seconds
+  , sessionCookieName   :: ByteString
+  }
 
--- | Create new session and save it in Redis db. Return new session id
-createSession :: SessionSettings -- ^
-  -> ByteString -- ^ Session payload
-  -> IO ByteString
-createSession SessionSettings{..} payload = do
-  token <- genToken
+instance Default SessionSettings where
+  def = SessionSettings
+    { redisConnectionInfo = defaultConnectInfo
+    , expiratinTime       = 60*60*24*7 -- One week
+    , sessionCookieName   = "SESSION_ID"
+    }
+
+eitherToMaybe :: Either a b -> Maybe b
+eitherToMaybe (Left _)  = Nothing
+eitherToMaybe (Right a) = Just a
+
+connectAndRunRedis :: ConnectInfo -> Redis b -> IO b
+connectAndRunRedis ci cmd = do
+  conn <- connect ci
+  res  <- runRedis conn cmd
+  disconnect conn
+  return res
+
+createSession :: SessionSettings -> IO ByteString
+createSession SessionSettings{..} = do
+  sesId <- genSessionId
   connectAndRunRedis redisConnectionInfo $ do
-    set token payload
-    expire token expiratinTime
-  return token
+    hset sesId "" ""
+    expire sesId expiratinTime
+  return sesId
+
+insertIntoSession :: SessionSettings
+  -> ByteString -- ^ Sessionn id
+  -> ByteString -- ^ Key
+  -> ByteString -- ^ Value
+  -> IO ()
+insertIntoSession SessionSettings{..} sesId key value = do
+  connectAndRunRedis redisConnectionInfo $ do
+    hset sesId key value
+    expire sesId expiratinTime
+  return ()
+
+lookupFromSession :: SessionSettings
+  -> ByteString -- ^ Session id
+  -> ByteString -- ^ Key
+  -> IO (Maybe ByteString)
+lookupFromSession SessionSettings{..} sesId key = do
+  v <- connectAndRunRedis redisConnectionInfo $ do
+    v <- hget sesId key
+    expire sesId expiratinTime
+    return v
+  return $ join $ eitherToMaybe v
 
 -- | Invalidate session id
 clearSession :: SessionSettings -- ^
@@ -32,36 +79,20 @@ clearSession SessionSettings{..} sessionId = do
     del [sessionId]
   return ()
 
--- Get session payload from Redis db
-readSession :: SessionSettings -- ^
-  -> ByteString -- ^ Session id
-  -> IO (Maybe ByteString)
-readSession SessionSettings{..} sessionId = do
-  v <- connectAndRunRedis redisConnectionInfo $ do
-    v <- get sessionId
-    expire sessionId expiratinTime
-    return v
-  return $ join $ eitherToMaybe v
+redisStore :: (MonadIO m, Eq k, Serialize k, Serialize v) => SessionSettings -> IO (SessionStore m k v)
+redisStore s = do
+  return $ redisStore' s
 
--- | Create new session and send it to client
-createSessionAndSend :: SessionSettings -- ^
-  -> ByteString -- ^ Session payload
-  -> Application
-createSessionAndSend s payload _ h = do
-  t <- createSession s payload
-  h $ responseLBS status200 (createSessionHeader s t) ""
+redisStore' :: (MonadIO m1, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> IO (Session m1 k v, m2 ByteString)
+redisStore' s (Just sesId) = do
+  return (mkSessionFromSesId s sesId, return sesId)
+redisStore' s Nothing = do
+  sesId <- createSession s
+  return (mkSessionFromSesId s sesId, return sesId)
 
--- | Read session id from cookie and perform action with session payload. Reponds with 401 when session is invalid
-withSession :: SessionSettings -- ^
-  -> (ByteString -> Application) -- ^ Action with session payload
-  -> Application
-withSession s cmd req h = do
-  let sessionId = getSessionCookie s req
-  case sessionId of
-    Nothing -> h $ responseLBS status401 [] "Missing session cookie"
-    Just sessionId' -> do
-      v <- readSession s sessionId'
-      case v of
-        Nothing -> h $ responseLBS status401 [] "Invalid session cookie"
-        Just v' -> cmd v' req h
+mkSessionFromSesId :: (MonadIO m, Eq k, Serialize k, Serialize v) => SessionSettings -> ByteString -> Session m k v
+mkSessionFromSesId s sesId = (mkLookup, mkInsert)
+  where
+    mkLookup k = liftIO $ fmap (join . fmap (eitherToMaybe . decode)) $ lookupFromSession s sesId (encode k)
+    mkInsert k v = liftIO $ insertIntoSession s sesId (encode k) (encode v)
 

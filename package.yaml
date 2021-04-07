@@ -15,12 +15,15 @@ dependencies:
 - base >= 4.10.0 && < 5
 - warp
 - wai
+- wai-session
 - http-types
 - cookie
 - hedis
 - uuid
 - bytestring
 - data-default
+- cereal
+- vault
 
 library:
   source-dirs: src
