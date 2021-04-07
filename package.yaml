@@ -20,7 +20,31 @@ dependencies:
 - data-default
 - cereal
 - vault
+- hspec
+- warp
+- http-types
 
 library:
   source-dirs: src
 
+executables:
+  wai-session-redis-example-exe:
+    main:                Main.hs
+    source-dirs:         example
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - wai-session-redis
+
+tests:
+  wai-session-redis-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - wai-session-redis

@@ -11,6 +11,7 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Data.ByteString        (ByteString)
 import           Data.Default
+import           Data.Either
 import           Data.Serialize         (Serialize, decode, encode)
 import           Database.Redis         hiding (decode)
 import           Network.Wai.Session
@@ -47,6 +48,12 @@ createSession SessionSettings{..} = do
     hset sesId "" ""
     expire sesId expiratinTime
   return sesId
+
+isSesIdValid :: SessionSettings -> ByteString -> IO Bool
+isSesIdValid SessionSettings{..} sesId = do
+  res <- connectAndRunRedis redisConnectionInfo $ do
+    exists sesId
+  return $ fromRight False res
 
 insertIntoSession :: SessionSettings
   -> ByteString -- ^ Sessionn id
@@ -85,7 +92,10 @@ redisStore s = do
 
 redisStore' :: (MonadIO m1, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> IO (Session m1 k v, m2 ByteString)
 redisStore' s (Just sesId) = do
-  return (mkSessionFromSesId s sesId, return sesId)
+  isValid <- isSesIdValid s sesId
+  if isValid
+    then return (mkSessionFromSesId s sesId, return sesId)
+    else redisStore' s Nothing
 redisStore' s Nothing = do
   sesId <- createSession s
   return (mkSessionFromSesId s sesId, return sesId)
