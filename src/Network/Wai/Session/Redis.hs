@@ -5,11 +5,9 @@ module Network.Wai.Session.Redis where
 
 import           Control.Monad
 import           Data.ByteString                           (ByteString)
-import           Data.List                                 (find)
 import           Database.Redis
 import           Network.HTTP.Types
 import           Network.Wai
-import           Web.Cookie
 
 import           Network.Wai.Session.Redis.Internal
 import           Network.Wai.Session.Redis.SessionSettings
@@ -31,7 +29,9 @@ clearSessionInRedis ci key = do
 readSession :: SessionSettings -> ByteString -> IO (Maybe ByteString)
 readSession SessionSettings{..} key = do
   v <- connectAndRunRedis redisConnectionInfo $ do
-    get key
+    v <- get key
+    expire key expiratinTime
+    return v
   return $ join $ eitherToMaybe v
 
 createNewSession :: SessionSettings -> ByteString -> Application
