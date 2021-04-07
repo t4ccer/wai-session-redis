@@ -12,7 +12,10 @@ import           Network.Wai
 import           Network.Wai.Session.Redis.Internal
 import           Network.Wai.Session.Redis.SessionSettings
 
-createSessionInRedis :: SessionSettings -> ByteString -> IO ByteString
+-- | Create new session and save it in Redis db. Return new session id
+createSessionInRedis :: SessionSettings -- ^
+  -> ByteString -- ^ Session payload
+  -> IO ByteString
 createSessionInRedis SessionSettings{..} payload = do
   token <- genToken
   connectAndRunRedis redisConnectionInfo $ do
@@ -20,13 +23,19 @@ createSessionInRedis SessionSettings{..} payload = do
     expire token expiratinTime
   return token
 
-clearSessionInRedis :: ConnectInfo -> ByteString -> IO ()
+-- | Invalidate session id
+clearSessionInRedis :: ConnectInfo -- ^
+  -> ByteString -- ^ Session id
+  -> IO ()
 clearSessionInRedis ci key = do
   connectAndRunRedis ci $ do
     del [key]
   return ()
 
-readSession :: SessionSettings -> ByteString -> IO (Maybe ByteString)
+-- Get session payload from Redis db
+readSession :: SessionSettings -- ^
+  -> ByteString -- ^ Session id
+  -> IO (Maybe ByteString)
 readSession SessionSettings{..} key = do
   v <- connectAndRunRedis redisConnectionInfo $ do
     v <- get key
@@ -34,12 +43,18 @@ readSession SessionSettings{..} key = do
     return v
   return $ join $ eitherToMaybe v
 
-createNewSession :: SessionSettings -> ByteString -> Application
+-- | Create new session and send it to client
+createNewSession :: SessionSettings -- ^
+  -> ByteString -- ^ Session payload
+  -> Application
 createNewSession s payload _ h = do
   t <- createSessionInRedis s payload
   h $ responseLBS status200 (createSessionHeader s t) ""
 
-withSession :: SessionSettings -> (ByteString -> Application) -> Application
+-- | Read session id from cookie and perform action with session payload. Reponds with 401 when session is invalid
+withSession :: SessionSettings -- ^
+  -> (ByteString -> Application) -- ^ Action with session payload
+  -> Application
 withSession s cmd req h = do
   let sessionId = getSessionCookie s req
   case sessionId of
