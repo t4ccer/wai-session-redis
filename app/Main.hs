@@ -12,15 +12,15 @@ import           Network.Wai.Handler.Warp
 import           Network.Wai.Session.Redis
 import           Network.Wai.Session.Redis.SessionSettings
 
-showCookie :: SBS.ByteString -> Application
-showCookie v _ h = do
+showPayload :: SBS.ByteString -> Application
+showPayload v _ h = do
   h $ responseLBS status200 [] $ LBS.fromStrict v
 
 myApp :: SessionSettings -> Application
 myApp s req h = do
   let app = case rawPathInfo req of
-        "/login" -> createNewSession s "t4ccer"
-        "/show"  -> withSession s showCookie
+        "/login" -> createSessionAndSend s "t4ccer"
+        "/show"  -> withSession s showPayload
         _        -> undefined
   app req h
 
