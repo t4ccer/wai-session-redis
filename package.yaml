@@ -13,13 +13,9 @@ description:         Please see the README on GitHub at <https://github.com/t4cc
 
 dependencies:
 - base >= 4.10.0 && < 5
-- warp
 - wai
 - wai-session
-- http-types
-- cookie
 - hedis
-- uuid
 - bytestring
 - data-default
 - cereal
@@ -27,19 +23,4 @@ dependencies:
 
 library:
   source-dirs: src
-
-executables:
-  wai-redis-session-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -Wall
-    - -Wno-unused-do-bind
-    - -Wpartial-fields
-    - -Wincomplete-uni-patterns
-    dependencies:
-    - wai-session-redis
 
