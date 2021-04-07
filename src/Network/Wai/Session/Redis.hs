@@ -20,14 +20,12 @@ data SessionSettings = SessionSettings
   { redisConnectionInfo :: ConnectInfo
   , expiratinTime       :: Integer
   -- ^ Session expiration time in seconds
-  , sessionCookieName   :: ByteString
   }
 
 instance Default SessionSettings where
   def = SessionSettings
     { redisConnectionInfo = defaultConnectInfo
     , expiratinTime       = 60*60*24*7 -- One week
-    , sessionCookieName   = "SESSION_ID"
     }
 
 eitherToMaybe :: Either a b -> Maybe b

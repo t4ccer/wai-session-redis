@@ -27,5 +27,5 @@ main = do
   let s = def
   session <- Vault.newKey
   store <- redisStore s
-  run 1337 $ withSession store (fromString $ SBS.unpack $ sessionCookieName s) def session $ app session
+  run 1337 $ withSession store (fromString "SESSION") def session $ app session
 
