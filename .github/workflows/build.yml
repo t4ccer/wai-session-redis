@@ -7,6 +7,7 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
+
       - name: Setup stack
         uses: haskell/actions/setup@v1
         with:
@@ -14,9 +15,20 @@ jobs:
           cabal-version: 'latest'
           enable-stack: true
           stack-version: 'latest'
+
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.stack
+          key: ${{ runner.os }}-${{ hashFiles('stack.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+
       - name: Build
         run: stack build
+
       - name: Start Redis
         uses: supercharge/redis-github-action@1.2.0
+
       - name: Tests
         run: stack test
