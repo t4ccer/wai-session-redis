@@ -98,15 +98,15 @@ clearSession SessionSettings{..} sessionId = do
 -- | Create new redis backend wai session store
 dbStore :: (MonadIO m1, MonadIO m2, Eq k, Serialize k, Serialize v) => SessionSettings -> m2 (SessionStore m1 k v)
 dbStore s = do
-  return $ redisStore' s
+  return $ dbStore' s
 
 dbStore' :: (MonadIO m1, MonadIO m2, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> m2 (Session m1 k v, m2 ByteString)
 dbStore' s (Just sesId) = do
   isValid <- isSesIdValid s sesId
   if isValid
     then return (mkSessionFromSesId s sesId, return sesId)
-    else redisStore' s Nothing
-redisStore' s Nothing = do
+    else dbStore' s Nothing
+dbStore' s Nothing = do
   sesId <- createSession s
   return (mkSessionFromSesId s sesId, return sesId)
 
