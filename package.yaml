@@ -4,25 +4,24 @@ github:              "t4ccer/wai-session-redis"
 license:             BSD3
 author:              "t4ccer"
 maintainer:          "t4ccre@gmail.com"
-copyright:           "t4ccer"
+copyright:           "(c) 2021 t4ccer"
+category: Web
 
 extra-source-files:
 - README.md
 
-description:         Please see the README on GitHub at <https://github.com/t4ccer/wai-session-redis#readme>
+synopsis: Simple Redis backed wai-session backend. 
+description: Simple Redis backed wai-session backend. This module allows you to store session data of wai-sessions in a Redis database.
 
 dependencies:
 - base >= 4.10.0 && < 5
-- wai
-- wai-session
-- hedis
 - bytestring
 - data-default
-- cereal
-- vault
-- hspec
-- warp
-- http-types
+- wai >= 3.2 && < 3.3
+- wai-session >= 0.3.3 && < 0.3.4
+- hedis >= 0.14 && < 0.15
+- cereal >= 0.5.8 && < 0.5.9
+- vault >= 0.3.1 && < 0.3.2
 
 library:
   source-dirs: src
@@ -37,6 +36,8 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - wai-session-redis
+    - warp < 3.3.15
+    - http-types < 0.13
 
 tests:
   wai-session-redis-test:
@@ -48,3 +49,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - wai-session-redis
+    - hspec < 2.8
