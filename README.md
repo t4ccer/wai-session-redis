@@ -1,6 +1,6 @@
 # wai-session-redis
 Provides Redis based session store for [Network.Wai.Session](https://hackage.haskell.org/package/wai-session)  
-For example usage view [example/Main.hs](example/Main.hs)
+For example usage view [example/Main.hs](https://github.com/t4ccer/wai-session-redis/tree/main/example/Main.hs)
 
 ## Tests
 To run tests `wai-session-redis` must have access to running `redis` instance.
