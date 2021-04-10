@@ -15,8 +15,8 @@ description: Simple Redis backed wai-session backend. This module allows you to 
 
 dependencies:
 - base >= 4.10.0 && < 5
-- bytestring
-- data-default
+- bytestring >= 0.10 && < 0.11
+- data-default >= 0.7 && < 0.8
 - wai >= 3.2 && < 3.3
 - wai-session >= 0.3.3 && < 0.3.4
 - hedis >= 0.14 && < 0.15

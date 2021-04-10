@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b5953c83c3c20f55c3c9bb5702e95a70f43161bfc864f72b35bc9e107522430f
+-- hash: e650110f1735e4f08be9be96eb45964f5be6a0be9236df5cf9f447adbc8468e0
 
 name:           wai-session-redis
 version:        0.1.0.0
@@ -35,9 +35,9 @@ library
       src
   build-depends:
       base >=4.10.0 && <5
-    , bytestring
+    , bytestring >=0.10 && <0.11
     , cereal >=0.5.8 && <0.5.9
-    , data-default
+    , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
     , vault >=0.3.1 && <0.3.2
     , wai >=3.2 && <3.3
@@ -53,9 +53,9 @@ executable wai-session-redis-example-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.10.0 && <5
-    , bytestring
+    , bytestring >=0.10 && <0.11
     , cereal >=0.5.8 && <0.5.9
-    , data-default
+    , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
     , http-types <0.13
     , vault >=0.3.1 && <0.3.2
@@ -75,9 +75,9 @@ test-suite wai-session-redis-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.10.0 && <5
-    , bytestring
+    , bytestring >=0.10 && <0.11
     , cereal >=0.5.8 && <0.5.9
-    , data-default
+    , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
     , hspec <2.8
     , vault >=0.3.1 && <0.3.2
