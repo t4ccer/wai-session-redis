@@ -3,7 +3,7 @@ version:             0.1.0.0
 github:              "t4ccer/wai-session-redis"
 license:             BSD3
 author:              "t4ccer"
-maintainer:          "t4ccre@gmail.com"
+maintainer:          "t4ccer@gmail.com"
 copyright:           "(c) 2021 t4ccer"
 category: Web
 
