@@ -1,4 +1,8 @@
 # wai-session-redis
+
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/t4ccer/wai-session-redis/Build?label=build)
+![Hackage](https://img.shields.io/hackage/v/wai-session-redis?color=blue)
+
 Provides Redis based session store for [Network.Wai.Session](https://hackage.haskell.org/package/wai-session)  
 For example usage view [example/Main.hs](https://github.com/t4ccer/wai-session-redis/tree/main/example/Main.hs)
 
