@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e650110f1735e4f08be9be96eb45964f5be6a0be9236df5cf9f447adbc8468e0
+-- hash: 46eb95f347bb82c7f1edae463be769e9cc6443757e4f4bf365d490bf6800fd4e
 
 name:           wai-session-redis
 version:        0.1.0.0
@@ -14,7 +14,7 @@ category:       Web
 homepage:       https://github.com/t4ccer/wai-session-redis#readme
 bug-reports:    https://github.com/t4ccer/wai-session-redis/issues
 author:         t4ccer
-maintainer:     t4ccre@gmail.com
+maintainer:     t4ccer@gmail.com
 copyright:      (c) 2021 t4ccer
 license:        BSD3
 license-file:   LICENSE
@@ -36,12 +36,12 @@ library
   build-depends:
       base >=4.10.0 && <5
     , bytestring >=0.10 && <0.11
-    , cereal >=0.5.8 && <0.5.9
+    , cereal >=0.5.8 && <0.6
     , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
-    , vault >=0.3.1 && <0.3.2
+    , vault >=0.3.1 && <0.4
     , wai >=3.2 && <3.3
-    , wai-session >=0.3.3 && <0.3.4
+    , wai-session >=0.3.3 && <0.4
   default-language: Haskell2010
 
 executable wai-session-redis-example-exe
@@ -54,15 +54,15 @@ executable wai-session-redis-example-exe
   build-depends:
       base >=4.10.0 && <5
     , bytestring >=0.10 && <0.11
-    , cereal >=0.5.8 && <0.5.9
+    , cereal >=0.5.8 && <0.6
     , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
     , http-types <0.13
-    , vault >=0.3.1 && <0.3.2
+    , vault >=0.3.1 && <0.4
     , wai >=3.2 && <3.3
-    , wai-session >=0.3.3 && <0.3.4
+    , wai-session >=0.3.3 && <0.4
     , wai-session-redis
-    , warp <3.3.15
+    , warp <3.4
   default-language: Haskell2010
 
 test-suite wai-session-redis-test
@@ -76,12 +76,12 @@ test-suite wai-session-redis-test
   build-depends:
       base >=4.10.0 && <5
     , bytestring >=0.10 && <0.11
-    , cereal >=0.5.8 && <0.5.9
+    , cereal >=0.5.8 && <0.6
     , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
     , hspec <2.8
-    , vault >=0.3.1 && <0.3.2
+    , vault >=0.3.1 && <0.4
     , wai >=3.2 && <3.3
-    , wai-session >=0.3.3 && <0.3.4
+    , wai-session >=0.3.3 && <0.4
     , wai-session-redis
   default-language: Haskell2010
