@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0c1c34a48b0e5730e5827568ac47fb0dba51ecf0b916ed994028cfbedf12307f
+-- hash: 487a9f3aad8d8b0c753b65d26f4bbaa68567b69ed2744a3528d7e8e35704cdb6
 
 name:           wai-session-redis
 version:        0.1.0.1
@@ -79,7 +79,7 @@ test-suite wai-session-redis-test
     , cereal >=0.5.8 && <0.6
     , data-default >=0.7 && <0.8
     , hedis >=0.14 && <0.15
-    , hspec <2.8
+    , hspec <2.9
     , vault >=0.3.1 && <0.4
     , wai >=3.2 && <3.3
     , wai-session >=0.3.3 && <0.4

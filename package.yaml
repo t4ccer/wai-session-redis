@@ -49,4 +49,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - wai-session-redis
-    - hspec < 2.8
+    - hspec < 2.9
