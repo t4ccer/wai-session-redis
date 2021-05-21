@@ -50,6 +50,9 @@ connectAndRunRedis ci cmd = liftIO do
   disconnect conn
   return res
 
+connectAndRunRedis_ :: MonadIO m => ConnectInfo -> Redis b -> m ()
+connectAndRunRedis_ ci = void . connectAndRunRedis ci
+
 createSession :: MonadIO m => SessionSettings -> m ByteString
 createSession SessionSettings{..} = liftIO do
   sesId <- genSessionId
@@ -60,7 +63,7 @@ createSession SessionSettings{..} = liftIO do
 
 isSesIdValid :: MonadIO m => SessionSettings -> ByteString -> m Bool
 isSesIdValid SessionSettings{..} sesId = liftIO do
-  res <- connectAndRunRedis redisConnectionInfo $ do
+  res <- connectAndRunRedis redisConnectionInfo $
     exists sesId
   return $ fromRight False res
 
@@ -69,11 +72,10 @@ insertIntoSession :: MonadIO m => SessionSettings
   -> ByteString -- ^ Key
   -> ByteString -- ^ Value
   -> m ()
-insertIntoSession SessionSettings{..} sesId key value = do
-  connectAndRunRedis redisConnectionInfo $ do
-    hset sesId key value
-    expire sesId expiratinTime
-  return ()
+insertIntoSession SessionSettings{..} sesId key value =
+  connectAndRunRedis_ redisConnectionInfo $ do
+  hset sesId key value
+  expire sesId expiratinTime
 
 lookupFromSession :: MonadIO m => SessionSettings
   -> ByteString -- ^ Session id
@@ -90,14 +92,13 @@ lookupFromSession SessionSettings{..} sesId key = do
 clearSession :: MonadIO m => SessionSettings
   -> ByteString -- ^ Session id
   -> m ()
-clearSession SessionSettings{..} sessionId = do
-  connectAndRunRedis redisConnectionInfo $ do
-    del [sessionId]
-  return ()
+clearSession SessionSettings{..} sessionId =
+  connectAndRunRedis_ redisConnectionInfo $
+  del [sessionId]
 
 -- | Create new redis backend wai session store
 dbStore :: (MonadIO m1, MonadIO m2, Eq k, Serialize k, Serialize v) => SessionSettings -> m2 (SessionStore m1 k v)
-dbStore s = do
+dbStore s =
   return $ dbStore' s
 
 dbStore' :: (MonadIO m1, MonadIO m2, Eq k, Serialize k, Serialize v, Monad m2) => SessionSettings -> Maybe ByteString -> m2 (Session m1 k v, m2 ByteString)
@@ -113,6 +114,6 @@ dbStore' s Nothing = do
 mkSessionFromSesId :: (MonadIO m1, Eq k, Serialize k, Serialize v) => SessionSettings -> ByteString -> Session m1 k v
 mkSessionFromSesId s sesId = (mkLookup, mkInsert)
   where
-    mkLookup k = liftIO $ fmap (join . fmap (eitherToMaybe . decode)) $ lookupFromSession s sesId (encode k)
+    mkLookup k = liftIO (((eitherToMaybe . decode) =<<) <$> lookupFromSession s sesId (encode k))
     mkInsert k v = liftIO $ insertIntoSession s sesId (encode k) (encode v)
 
