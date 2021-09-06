@@ -19,7 +19,7 @@ dependencies:
 - data-default >= 0.7 && < 0.8
 - wai >= 3.2 && < 3.3
 - wai-session >= 0.3.3 && < 0.4
-- hedis >= 0.14 && < 0.15
+- hedis >= 0.14 && < 0.16
 - cereal >= 0.5.8 && < 0.6
 - vault >= 0.3.1 && < 0.4
 
