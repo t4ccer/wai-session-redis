@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d1cfdb95c6be241adf9e7f6848de2fcad9b632bc0ac1e102cba74ca97043d171
+-- hash: 963fcb2dd15f642fd86c4c482209668adb39ffddf9c09d0a0907a8d71088ae86
 
 name:           wai-session-redis
-version:        0.1.0.2
+version:        0.1.0.3
 synopsis:       Simple Redis backed wai-session backend.
 description:    Simple Redis backed wai-session backend. This module allows you to store session data of wai-sessions in a Redis database.
 category:       Web
