@@ -1,8 +1,10 @@
-on: [push]
 name: Build
+on:
+  pull_request:
+  push:
 jobs:
-  build:
-    name: Build
+  build-ubuntu:
+    name: Build Ubuntu
     runs-on: ubuntu-latest 
     steps:
       - name: Git checkout
@@ -11,7 +13,7 @@ jobs:
       - name: Setup stack
         uses: haskell/actions/setup@v1
         with:
-          ghc-version: '8.8.4' 
+          ghc-version: '8.10.7'
           cabal-version: 'latest'
           enable-stack: true
           stack-version: 'latest'
@@ -32,3 +34,18 @@ jobs:
 
       - name: Tests
         run: stack test
+
+  build-nix:
+    name: Build Nix unstable
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2.3.4
+
+    - name: Setup Nix
+      uses: cachix/install-nix-action@v13
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+
+    - name: Build
+      run: nix-build
