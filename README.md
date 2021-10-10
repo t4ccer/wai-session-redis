@@ -8,9 +8,15 @@ For example usage view [example/Main.hs](https://github.com/t4ccer/wai-session-r
 
 ## Tests
 To run tests `wai-session-redis` must have access to running `redis` instance.
-### Using docker
+### Using docker and stack
 ```bash
 docker run --name redis-session-tests -p 6379:6379 -d redis
 stack test
 docker rm -f redis-session-tests
+```
+
+### Using nix
+Nix takes care of running `redis` instance and testing `wai-session-redis`.
+```bash
+nix-build
 ```
