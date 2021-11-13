@@ -3,8 +3,6 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 91266d9b2afdd8999d2fb3b7ea42af1786d212356314d4c91028192a1b1ff2cb
 
 name:           wai-session-redis
 version:        0.1.0.4

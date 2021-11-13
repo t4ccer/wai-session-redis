@@ -3,9 +3,45 @@ on:
   pull_request:
   push:
 jobs:
+  valid-cabal:
+    name: Validate cabal file
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2.3.4
+
+    - name: Setup Nix
+      uses: cachix/install-nix-action@v13
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+
+    - name: Validate
+      run: |
+        mv  wai-session-redis.cabal wai-session-redis.cabal.bak
+        nix-shell -p hpack --run hpack
+        diff wai-session-redis.cabal wai-session-redis.cabal.bak
+
+  valid-nix:
+    name: Validate Nix package
+    runs-on: ubuntu-latest
+    needs: valid-cabal
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2.3.4
+
+    - name: Setup Nix
+      uses: cachix/install-nix-action@v13
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+
+    - name: Validate
+      run: |
+        nix-shell -p cabal2nix --run "cabal2nix . > wai-session-redis.nix.gen"
+        diff wai-session-redis.nix wai-session-redis.nix.gen
+
   build-ubuntu:
     name: Build Ubuntu
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
@@ -38,6 +74,7 @@ jobs:
   build-nix:
     name: Build Nix unstable
     runs-on: ubuntu-latest
+    needs: valid-nix
     steps:
     - name: Git checkout
       uses: actions/checkout@v2.3.4
@@ -49,3 +86,27 @@ jobs:
 
     - name: Build
       run: nix-build
+
+  publish:
+    name: Publish to Hackage
+    runs-on: ubuntu-latest
+    needs:
+      - build-ubuntu
+      - build-nix
+    if: "contains(github.event.head_commit.message, '[publish]')"
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Setup stack
+        uses: haskell/actions/setup@v1
+        with:
+          ghc-version: '8.10.7'
+          cabal-version: 'latest'
+          enable-stack: true
+          stack-version: 'latest'
+
+      - name: Upload
+        run: |
+          echo '${{ secrets.HACKAGE_CREDENTIALS }}' > ~/.stack/upload/credentials.json
+          stack upload

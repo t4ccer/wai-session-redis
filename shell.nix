@@ -6,5 +6,6 @@ mkShell {
     haskell.compiler.ghc8107
     cabal2nix
     redis
+    hpack
   ];
 }
