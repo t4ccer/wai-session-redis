@@ -27,13 +27,13 @@ jobs:
             ${{ runner.os }}-
 
       - name: Build
-        run: stack build
+        run: stack --no-nix build
 
       - name: Start Redis
         uses: supercharge/redis-github-action@1.2.0
 
       - name: Tests
-        run: stack test
+        run: stack --no-nix test
 
   build-nix:
     name: Build Nix unstable
