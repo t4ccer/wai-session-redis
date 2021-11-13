@@ -1,5 +1,5 @@
 name:                wai-session-redis
-version:             0.1.0.3
+version:             0.1.0.4
 github:              "t4ccer/wai-session-redis"
 license:             BSD3
 author:              "t4ccer"

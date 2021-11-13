@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "wai-session-redis";
-  version = "0.1.0.2";
+  version = "0.1.0.4";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
